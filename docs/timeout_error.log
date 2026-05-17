@@ -1,0 +1,13 @@
+2026-05-18 10:42:11 ERROR [org.apache.cxf.interceptor.LoggingInInterceptor]
+
+java.net.SocketTimeoutException: Read timed out
+
+at java.net.SocketInputStream.socketRead0(Native Method)
+at java.net.SocketInputStream.socketRead(SocketInputStream.java:116)
+at java.net.SocketInputStream.read(SocketInputStream.java:171)
+
+Request URL:
+https://payments-provider/api/v1/process
+
+Possible cause:
+External provider response exceeded configured timeout threshold.

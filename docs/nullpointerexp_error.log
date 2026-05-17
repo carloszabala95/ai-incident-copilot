@@ -1,0 +1,13 @@
+2026-05-18 12:55:43 ERROR [com.enterprise.orders]
+
+java.lang.NullPointerException
+
+at com.enterprise.orders.service.OrderService.processOrder(OrderService.java:245)
+
+Description:
+Attempt to invoke method on null object reference.
+
+Possible causes:
+- Object not initialized
+- Missing validation
+- Dependency injection failure

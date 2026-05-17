@@ -9,6 +9,8 @@ from langchain_core.documents import Document
 ## Fase 2 persistencia
 import time
 from app.database import init_db, save_interaction, update_feedback, get_recent_interactions, get_metrics
+## Rule-based error classifier
+from app.error_classifier import classify_incident
 
 
 load_dotenv()
@@ -46,6 +48,11 @@ if "vectorstore" not in st.session_state:
 if uploaded_file:
     # Leer el contenido del archivo
     content = uploaded_file.read().decode("utf-8", errors="ignore")
+    # Clasificar el incidente utilizando el clasificador basado en reglas
+    incident_category = classify_incident(content)
+
+    st.subheader("Clasificación automática")
+    st.info(f"📌 Categoría detectada: {incident_category}")
     # Mostrar una vista previa del contenido
     st.subheader("Vista previa del archivo")
     st.text(content[:2000])
@@ -106,6 +113,7 @@ if question and st.session_state.vectorstore:
         question=question,
         answer=response.content,
         source=source,
+        category=incident_category,
         latency_seconds=latency_seconds
     )
     # Guardar el ID de la última interacción en el estado de la sesión para futuras referencias (como feedback)
@@ -140,7 +148,7 @@ st.subheader("Historial reciente")
 rows = get_recent_interactions(limit=5)
 
 for row in rows:
-    interaction_id, question, answer, source, latency, feedback, created_at = row
+    interaction_id, question, answer, source, category, latency, feedback, created_at = row
 
     with st.expander(f"{created_at} - {question[:80]}"):
         st.write("**Pregunta:**")

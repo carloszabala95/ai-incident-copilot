@@ -1,0 +1,14 @@
+2026-05-18 11:01:55 ERROR [org.apache.http.ssl]
+
+javax.net.ssl.SSLHandshakeException:
+PKIX path building failed:
+sun.security.provider.certpath.SunCertPathBuilderException:
+unable to find valid certification path to requested target
+
+Endpoint:
+https://secure-provider.com
+
+Possible causes:
+- Missing certificate in truststore
+- Expired certificate
+- Invalid CA chain

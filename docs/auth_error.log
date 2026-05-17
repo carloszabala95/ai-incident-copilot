@@ -1,0 +1,14 @@
+2026-05-18 11:22:09 ERROR [com.enterprise.auth]
+
+HTTP 401 Unauthorized
+
+Authentication failed for user:
+svc_payments_prod
+
+API:
+https://internal-api/v1/customer
+
+Possible causes:
+- Invalid credentials
+- Expired token
+- User locked

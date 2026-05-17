@@ -17,6 +17,7 @@ def init_db():
             question TEXT NOT NULL,
             answer TEXT NOT NULL,
             source TEXT,
+            category TEXT,
             latency_seconds REAL,
             feedback TEXT,
             created_at TEXT NOT NULL
@@ -27,7 +28,7 @@ def init_db():
     conn.close()
 
 # Función para guardar una nueva interacción
-def save_interaction(question, answer, source, latency_seconds):
+def save_interaction(question, answer, source, category, latency_seconds):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
@@ -36,15 +37,17 @@ def save_interaction(question, answer, source, latency_seconds):
             question,
             answer,
             source,
+            category,
             latency_seconds,
             feedback,
             created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     """, (
         question,
         answer,
         source,
+        category,
         latency_seconds,
         None,
         datetime.now().isoformat(timespec="seconds")
@@ -77,7 +80,7 @@ def get_recent_interactions(limit=10):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT id, question, answer, source, latency_seconds, feedback, created_at
+        SELECT id, question, answer, source, category, latency_seconds, feedback, created_at
         FROM interactions
         ORDER BY id DESC
         LIMIT ?

@@ -1,0 +1,13 @@
+2026-05-18 13:30:10 ERROR [org.apache.tomcat]
+
+java.lang.OutOfMemoryError: Java heap space
+
+Heap usage exceeded configured memory allocation.
+
+Current Heap:
+2048 MB
+
+Possible causes:
+- Memory leak
+- Large object allocation
+- Inefficient cache handling

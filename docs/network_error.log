@@ -1,0 +1,14 @@
+2026-05-18 12:14:00 ERROR [org.jboss.remoting]
+
+java.net.ConnectException:
+Connection refused: connect
+
+Host:
+10.20.44.12
+Port:
+8080
+
+Possible causes:
+- Service down
+- Firewall restriction
+- Wrong port configuration

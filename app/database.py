@@ -120,3 +120,21 @@ def get_metrics():
         "negative_feedback": negative_feedback,
         "without_feedback": without_feedback
     }
+
+# Función para obtener métricas por categoría
+def get_category_metrics():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT category, COUNT(*) as total
+        FROM interactions
+        WHERE category IS NOT NULL
+        GROUP BY category
+        ORDER BY total DESC
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return rows

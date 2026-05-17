@@ -181,10 +181,10 @@ streamlit run app/main.py
 - [x] SQLite persistence
 - [x] Feedback system
 - [x] AI observability metrics
+- [x] Automatic incident classification
 
 ## In Progress
 
-- [ ] Automatic incident classification
 - [ ] Advanced observability dashboard
 - [ ] Docker support
 - [ ] GitHub Actions CI
@@ -235,7 +235,3 @@ This project aims to simulate real-world enterprise AI solutions focused on:
 - Production support copilots
 
 ---
-
-# 📄 License
-
-MIT License

@@ -1,0 +1,10 @@
+services:
+  ai-incident-copilot:
+    build: .
+    container_name: ai-incident-copilot
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data

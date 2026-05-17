@@ -158,5 +158,6 @@ for row in rows:
         st.write(answer)
 
         st.write("**Fuente:**", source)
+        st.write("**Categoría:**", category)
         st.write("**Latencia:**", latency)
         st.write("**Feedback:**", feedback or "Sin feedback")

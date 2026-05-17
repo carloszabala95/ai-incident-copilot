@@ -1,0 +1,11 @@
+streamlit
+chromadb
+langchain
+langchain-openai
+langchain-community
+langchain-text-splitters
+python-dotenv
+opentelemetry-exporter-otlp-proto-grpc==1.41.1
+protobuf>=4.25.8,<8
+tiktoken
+pypdf

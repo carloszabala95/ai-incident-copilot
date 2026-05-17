@@ -1,0 +1,10 @@
+ERROR [org.jboss.jca.core.connectionmanager.listener.TxConnectionListener]
+IJ031070: Transaction cannot proceed: STATUS_MARKED_ROLLBACK
+
+Caused by: javax.transaction.RollbackException: Transaction is marked for rollback only.
+
+Possible causes:
+- Previous exception in the same transaction.
+- Non-XA datasource used with multiple transactional resources.
+- Database timeout.
+- EJB invocation failed before datasource enlistment.

@@ -3,6 +3,8 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from datetime import datetime
 from sqlalchemy import text
+from pgvector.sqlalchemy import Vector
+from langchain_openai import OpenAIEmbeddings
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -133,3 +135,48 @@ def get_metrics_pg():
             "negative_feedback": negative_feedback,
             "without_feedback": without_feedback
         }
+
+# Funciones para manejar los chunks de documentos en PostgreSQL
+def delete_chunks_by_source(source): # Eliminar chunks asociados a una fuente específica
+    with engine.begin() as connection:
+        connection.execute(
+            text("DELETE FROM document_chunks WHERE source = :source"),
+            {"source": source}
+        )
+
+# Guardar un chunk de documento con su embedding en PostgreSQL
+# Tener encuenta que el embedigns es una lista de números, por lo que se convierte a string antes de guardarlo. Al recuperarlo, se deberá convertir de nuevo a lista para usarlo en cálculos de similitud.
+def save_document_chunk_pg(source, chunk_text, embedding):
+    with engine.begin() as connection:
+        connection.execute(
+            text("""
+                INSERT INTO document_chunks (source, chunk_text, embedding)
+                VALUES (:source, :chunk_text, :embedding)
+            """),
+            {
+                "source": source,
+                "chunk_text": chunk_text,
+                "embedding": embedding
+            }
+        )
+
+#   Buscar chunks similares en PostgreSQL utilizando la función de distancia de pgvector
+def search_similar_chunks_pg(question, limit=4):
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    query_embedding = embeddings.embed_query(question)
+
+    with engine.connect() as connection:
+        result = connection.execute(
+            text("""
+                SELECT source, chunk_text, embedding <-> :query_embedding AS distance
+                FROM document_chunks
+                ORDER BY embedding <-> :query_embedding
+                LIMIT :limit
+            """),
+            {
+                "query_embedding": str(query_embedding),
+                "limit": limit
+            }
+        )
+
+        return result.fetchall()

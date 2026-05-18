@@ -6,10 +6,11 @@ from dotenv import load_dotenv
 from app.postgres_service import test_connection, save_interaction_pg, update_feedback_pg, get_recent_interactions_pg, get_category_metrics_pg, get_metrics_pg
 
 from app.file_service import read_uploaded_file, get_file_preview
-from app.rag_service import create_vectorstore_from_text, answer_question
+# Se commenta from app.rag_service import create_vectorstore_from_text, answer_question # Servicio original con ChromaDB
+from app.pgvector_rag_service import index_document_pgvector, answer_question_pgvector # Nuevo servicio con pgvector y PostgreSQL
+
 from app.error_classifier import classify_incident
 from app.metrics_service import build_category_chart_data
-from app.postgres_service import test_connection
 
 load_dotenv()
 # Inicializar la base de datos
@@ -32,15 +33,18 @@ st.sidebar.subheader("PostgreSQL")
 st.sidebar.success("Conexión OK")
 
 st.sidebar.caption(postgres_version)
-# Inicializar variables de sesión
-if "vectorstore" not in st.session_state:
-    st.session_state.vectorstore = None
+# Inicializar variables de sesión 
+# if "vectorstore" not in st.session_state: solo para el servicio con ChromaDB. En el nuevo servicio con pgvector no es necesario mantener el vectorstore en la sesión, ya que se consulta directamente a PostgreSQL para recuperar los chunks relevantes.
+#    st.session_state.vectorstore = None
 
 if "incident_category" not in st.session_state:
     st.session_state.incident_category = None
 
 if "source_name" not in st.session_state:
     st.session_state.source_name = None
+
+if "document_indexed" not in st.session_state:
+    st.session_state.document_indexed = False
 
 # Barra lateral con métricas y categorías
 st.sidebar.title("📊 AI Observability")
@@ -85,12 +89,12 @@ if uploaded_file:
     st.info(f"📌 Categoría detectada: {incident_category}")
 
     if st.button("Procesar archivo"):
-        vectorstore, chunks_count = create_vectorstore_from_text(
+        chunks_count = index_document_pgvector(
             content=content,
             source_name=source_name
         )
 
-        st.session_state.vectorstore = vectorstore
+        st.session_state.document_indexed = True
 
         st.success(f"Archivo procesado correctamente. Chunks generados: {chunks_count}")
 
@@ -98,12 +102,12 @@ st.divider()
 
 question = st.text_input("Haz una pregunta sobre el incidente o log:")
 
-if question and st.session_state.vectorstore:
+if question and st.session_state.document_indexed:
     start_time = time.time()
 
-    answer, relevant_docs = answer_question(
-        vectorstore=st.session_state.vectorstore,
-        question=question
+    answer, relevant_docs = answer_question_pgvector(
+        question=question,
+        k=4
     )
 
     latency_seconds = round(time.time() - start_time, 2)
@@ -135,12 +139,14 @@ if question and st.session_state.vectorstore:
             update_feedback_pg(st.session_state.last_interaction_id, "negative")
             st.warning("Feedback negativo registrado.")
 
-    with st.expander("Ver contexto recuperado"): # Mostrar los chunks relevantes recuperados
-        for i, doc in enumerate(relevant_docs, start=1):
+    with st.expander("Ver contexto recuperado"):
+        for i, row in enumerate(relevant_docs, start=1): # Aquí se asume que relevant_docs es una lista de objetos con atributos source, distance y chunk_text. Si search_similar_chunks_pg devuelve un formato diferente, este código deberá ajustarse en consecuencia.
             st.markdown(f"### Chunk {i}")
-            st.text(doc.page_content)
+            st.write(f"**Fuente:** {row.source}")
+            st.write(f"**Distancia:** {round(row.distance, 4)}")
+            st.text(row.chunk_text)
 
-elif question and not st.session_state.vectorstore:
+elif question and not st.session_state.document_indexed:
     st.warning("Primero debes subir y procesar un archivo.")
 
 st.divider()

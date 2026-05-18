@@ -6,5 +6,24 @@ services:
       - "8501:8501"
     env_file:
       - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://incident_user:incident_password@postgres:5432/incident_copilot
     volumes:
       - ./data:/app/data
+    depends_on:
+      - postgres
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ai-incident-postgres
+    environment:
+      POSTGRES_DB: incident_copilot
+      POSTGRES_USER: incident_user
+      POSTGRES_PASSWORD: incident_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
